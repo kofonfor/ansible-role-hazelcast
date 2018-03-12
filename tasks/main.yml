@@ -1,0 +1,24 @@
+- name: download Hazelcast
+  get_url: url=http://ns2.1888.spb.ru/hazelcast-3.9.1.tar.gz dest=/root/hazelcast-3.9.1.tar.gz
+
+- name: unarchive Hazelcast
+  unarchive: src=/root/hazelcast-3.9.1.tar.gz remote_src=True dest=/opt
+
+- name: create /opt/hazelcast
+  shell: cp -r /opt/hazelcast-3.9.1 /opt/hazelcast creates=/opt/hazelcast
+
+- name: print groups[hazelcast_group_name]
+  debug: var=groups[hazelcast_group_name]
+
+- name: print hostvars[host]
+  debug: var=hostvars[groups[hazelcast_group_name][0]]
+
+- name: put Hazelcast config file
+  template: src=hazelcast.xml dest=/opt/hazelcast/bin/hazelcast-default.xml backup=yes
+
+- name: put systemd unit file
+  template: src=hazelcast.service dest=/etc/systemd/system/hazelcast.service backup=yes
+  notify: systemctl daemon-reload
+
+- name: enable hazelcast service
+  service: name=hazelcast state=started enabled=yes
